@@ -1,0 +1,330 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+#define pb push_back
+
+const int MOD = 1e9 + 7;
+const int N = 2e5 + 5;
+const int INF = 1e9+10;
+const int LOG_N = 18;
+const ll MOD2 = 998244353;
+
+#ifndef ONLINE_JUDGE
+#define debug(x) cerr << #x <<" "; _print(x); cerr << endl;
+#define debugar(x, n) cerr << #x << " "; _printar(x, n); cerr << endl;
+#else
+#define debug(x)
+#define debugar(x, n)
+#endif
+
+void _print(ll t) {cerr << t;}
+void _print(int t) {cerr << t;}
+void _print(string t) {cerr << t;}
+void _print(char t) {cerr << t;}
+void _print(long double t) {cerr << t;}
+void _print(double t) {cerr << t;}
+void _print(unsigned long long t) {cerr << t;}
+void _printar(int arr[], int size){cerr << "[ ";for(int i = 0; i<size; i++){cerr << arr[i] << " ";}cerr << "]";}
+void _printar(char arr[], int size){cerr << "[ ";for(int i = 0; i<size; i++){cerr << arr[i] << " ";}cerr << "]";}
+void _printar(ll arr[], int size){cerr << "[ ";for(int i = 0; i<size; i++){cerr << arr[i] << " ";}cerr << "]";}
+
+
+template <class T, class V> void _print(pair <T, V> p);
+template <class T> void _print(vector <T> v);
+template <class T> void _print(set <T> v);
+template <class T, class V> void _print(map <T, V> v);
+template <class T> void _print(multiset <T> v);
+template <class T, class V> void _print(pair <T, V> p) {cerr << "{"; _print(p.first); cerr << ","; _print(p.second); cerr << "}";}
+template <class T> void _print(vector <T> v) {cerr << "[ "; for (T i : v) {_print(i); cerr << " ";} cerr << "]";}
+template <class T> void _print(set <T> v) {cerr << "[ "; for (T i : v) {_print(i); cerr << " ";} cerr << "]";}
+template <class T> void _print(multiset <T> v) {cerr << "[ "; for (T i : v) {_print(i); cerr << " ";} cerr << "]";}
+template <class T, class V> void _print(map <T, V> v) {cerr << "[ "; for (auto i : v) {_print(i); cerr << " ";} cerr << "]";}
+
+
+// //====================================================================================
+
+ll fastpow(ll x, ll y, int p){
+	ll res = 1;
+	x = x % p;
+	if (x == 0) return 0;
+	while (y > 0){        
+        if (y & 1)
+        	res = (res*x) % p;
+        y = y>>1;
+        x = (x*x) % p;
+    }
+    return res;
+}
+
+int gcd(int a, int b){return b == 0 ? a : gcd(b, a % b);}
+
+// // ====================================================================================
+
+class SparseTable{
+	int sparse[N][LOG_N];
+	SparseTable(vector<int> &v){
+		makeSparse(v, v.size());
+	}
+
+	int RMQ(int l, int r){
+		int length = r-l+1;
+		int k = 0;
+		while(1<<(k+1) <= length){
+			k++;
+		}
+		return min(sparse[l][k], sparse[r-(1<<k)+1][k]);
+	}
+
+	void makeSparse(vector<int> &arr, int n){
+		for(int i = 0; i<n; i++){
+			sparse[i][0] = arr[i];
+		}
+		for(int j = 1; j<=30; j++){
+			for(int i = 0; i + (1<<j) - 1 < n; i++){
+				sparse[i][j] = min(sparse[i][j-1], sparse[i+(1<<(j-1))][j-1]);
+			}
+		}
+	}
+};
+
+
+// // ===================================================================================
+
+
+class SegTree{
+public:
+	vector<ll> t;
+	int n;
+	SegTree(vector<ll> &vec){
+		n = vec.size();
+		t.resize(4*n);
+		build(vec, 1, 0, n-1);
+	}
+
+	void build(vector<ll> &a, int v, int tl, int tr) {
+	    if (tl == tr) {
+	        t[v] = a[tl];
+	    } 
+	    else {
+	        int tm = (tl + tr) / 2;
+	        build(a, v*2, tl, tm);
+	        build(a, v*2+1, tm+1, tr);
+	        t[v] = t[v*2] + t[v*2+1];
+	    }
+	}
+
+	void update(int v, int tl, int tr, int pos, int new_val){
+    if (tl == tr) {
+        t[v] = new_val;
+    }
+    else {
+        int tm = (tl + tr) / 2;
+        if (pos <= tm)
+            update(v*2, tl, tm, pos, new_val);
+        else
+            update(v*2+1, tm+1, tr, pos, new_val);
+        t[v] = t[v*2] + t[v*2+1];
+    	}
+    }
+
+    ll query(int i, int l, int r, int tl, int tr){
+    	if(l > tr || r < tl){
+    		return 0;
+    	}
+    	if(l>=tl && r<=tr){
+    		return t[i];
+    	}
+    	int mid = (l+r)/2;
+    	ll resL = query(2*i, l, mid, tl, tr);
+    	ll resR = query(2*i+1, mid+1, r, tl, tr);
+    	return resL+resR;
+    }
+
+};
+
+
+// //====================================================================================
+
+/*vector<int> parent;
+vector<int> sizes;
+
+
+int get(int x){
+	if(parent[x]==x)return x;
+	return parent[x] = get(parent[x]);
+}
+
+void merge(int x, int y){
+	x = get(x);
+	y = get(y);
+	if(sizes[x]<sizes[y])
+		swap(x, y);
+	parent[y] = x;
+	sizes[x]+=sizes[y];
+}*/
+
+// //====================================================================================
+
+const vector<vector<int>> direcs = {{0,1}, {1, 0}, {-1, 0}, {0, -1}};
+const vector<vector<int>> direcsd = {{0,1}, {1, 0}, {-1, 0}, {0, -1}, 
+				    {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
+
+
+// vector<int> vis(N, 0);
+// void dfs(vector<vector<int>> &adj, int k){
+// 	if(vis[k])return;
+// 	vis[k] = 1;
+// 	for(auto c:adj[k]){
+// 			dfs(adj, k);
+// 	}
+// 	return;
+// }
+
+
+
+class binarylift{
+	
+	public:
+		vector<int> vis_adj_to_parent;
+		vector<int> depth;
+		vector<int> parent;
+		vector<int> visd;
+		vector<vector<int>> up;
+		binarylift(vector<vector<int>> &adj, int n,int root = 1){
+			vis_adj_to_parent.resize(n+1, 0);
+			depth.resize(n+1, 0);
+			visd.resize(n+1, 0);
+			parent.resize(n+1, 0);
+			parent[1] = 1;
+			up.resize(n+1, vector<int>(19, 1));
+			adj_to_parent(adj, 1);
+			makedepth(1, adj);
+			makeup(n);
+		}
+
+		void makedepth(int kk, vector<vector<int>> &aj){
+			if(visd[kk]==1)return;
+			visd[kk] = 1;
+			for(auto cc:aj[kk]){
+				if(visd[cc]==0){
+					depth[cc] = depth[kk]+1;
+					makedepth(cc, aj);
+				}
+			}
+			return;
+		}
+
+		void adj_to_parent(vector<vector<int>> &adj, int start){
+			if(vis_adj_to_parent[start])return;
+			vis_adj_to_parent[start] = 1;
+			for(auto c:adj[start]){
+				if(!vis_adj_to_parent[c]){
+					parent[c] = start;
+				}
+			}
+			for(auto c: adj[start]){
+				adj_to_parent(adj, c);
+			}
+		}
+
+		void makeup(int n){
+			for(int i = 1; i<=n; i++){
+				up[i][0] = parent[i];
+			}
+			for(int j = 1; j<=18; j++){
+				for(int i = 1; i<=n; i++){
+					up[i][j] = up[up[i][j-1]][j-1];
+				}
+			}
+		}
+
+		int get_lca(int a, int b){
+			if(depth[a]<depth[b])swap(a, b);
+			if(a == b)return a;
+			int diff = depth[a]-depth[b];
+			for(int i = 18; i>=0; i--){
+				if(((diff) & (1<<i))){
+					a = up[a][i];
+				}
+			}
+			if(a==b)return a;
+			for(int i = 18; i>=0; i--){
+				if(up[a][i]!=up[b][i]){
+					a = up[a][i];
+					b = up[b][i];
+				}
+			}
+			return parent[a];
+		}
+
+		int gap(int a, int b){
+			return depth[a]+depth[b]-2*depth[get_lca(a, b)];
+		}
+		
+		int kthancestor(int start, int k){
+			int a = start;
+			for(int i = 0; i<=18; i++){
+				if(k&(1<<i)){
+					a = up[a][i];
+				}
+			}
+			return a;
+		}
+};
+
+
+
+
+// //====================================================================================
+
+
+
+vector<int> SieveOfEratosthenes(int n)
+{
+    // Create a boolean array "prime[0..n]" and initialize
+    // all entries it as true. A value in prime[i] will
+    // finally be false if i is Not a prime, else true.
+    vector<int> prime(n+1, 1);
+ 
+    for (int p = 2; p * p <= n; p++) {
+        // If prime[p] is not changed, then it is a prime
+        if (prime[p] == true) {
+            // Update all multiples of p greater than or
+            // equal to the square of it numbers which are
+            // multiple of p and are less than p^2 are
+            // already been marked.
+            for (int i = p * p; i <= n; i += p)
+                prime[i] = false;
+        }
+    }
+ 
+    // Print all prime numbers
+    return prime;
+}
+
+
+
+int val(char c){
+	if(c=='1')return 1;
+	else return 0;
+}
+
+char conv(int x){
+	if(x==1)return '1';
+	else return '0';
+}
+
+
+
+int main(){
+#ifndef ONLINE_JUDGE
+	freopen("Error.txt", "w", stderr);
+#endif
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+
+	
+}
+
+
